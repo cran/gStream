@@ -1,8 +1,7 @@
-gstream = function(distM, L, N0, k, statistics=c("all","o","w","g","m"), n0=0.3*L, n1=0.7*L, ARL=10000,alpha=0.05, skew.corr=TRUE){
+gstream = function(distM, L, N0, k, statistics=c("all","o","w","g","m"), n0=0.3*L, n1=0.7*L, ARL=10000,alpha=0.05,skew.corr=TRUE,asymp=FALSE){
   r1 = list()
   n0 = ceiling(n0)
   n1 = floor(n1)
-
   if(n0<2){
     cat("Note: Starting index has been set to n0 = 2 as the graph-based statistics are not well-defined for t<2. \n")
     n0=2
@@ -16,14 +15,16 @@ gstream = function(distM, L, N0, k, statistics=c("all","o","w","g","m"), n0=0.3*
   }
   N = dim(distM)[1]
   r1$scanZ = getscanZ(distM,N0,L,N,k,n0,n1,statistics)
-  r1$b = getb(distM,ARL,alpha,N0,n0,n1,L,k,statistics,skew.corr,dif=1e-10, nIterMax=100)
+
+  r1$b = getb(distM,ARL,alpha,N0,n0,n1,L,k,statistics,skew.corr,dif=1e-10, nIterMax=100,asymp)
+
   if (length(which(!is.na(match(c("o","ori","original","all"),statistics))))>0){
     r1$tauhat$ori = which(r1$scanZ$ori>r1$b$ori)
   }
   if (length(which(!is.na(match(c("w","weighted","all"),statistics))))>0){
     r1$tauhat$weighted = which(r1$scanZ$weighted>r1$b$weighted)
   }
-  if (length(which(!is.na(match(c("m","max","g","generalized","all"),statistics))))>0){
+  if (length(which(!is.na(match(c("m","max","all"),statistics))))>0){
     r1$tauhat$max.type = which(r1$scanZ$max.type>r1$b$max.type)
   }
   if (length(which(!is.na(match(c("g","generalized","all"),statistics))))>0){
@@ -204,6 +205,20 @@ C2_Z = function(x, L, k, psum, qsum, psumk, qsumk){ # x=n-t
   ((((4*x*(L - x))/(L*(L - 1)) - (16*(L - x)*(L - x - 1)*(x^2 - x))/(L*(L - 1)*(L - 2)*(L - 3)))*(2*k + 4*qsum - 2*qsum - 7*L*k - 8*L*qsum + 7*L*qsum - 2*L*qsumk - 9*L*k^2 + 3*L^2*k + 2*L^2*qsum - 3*L^2*qsum + 2*L^2*qsumk + 6*k^2 + 3*L^2*k^2))/(L^2 - 3*L + 2) + L*(3*k^2 + k + 2*qsum - qsum)*((4*(L^2 - 2*L*x - 2*L + x^2 + 2*x))/(L*(L - 1)*(L - 2)) - (4*x*(L - x))/(L^2*(L - 1)) + (4*x*(L - x))/(L*(L - 1)^2*(L - 2)) + (16*(-x + 1)*(L^2 - 3*L*x - L + 2*x^2 + x))/(L*(L - 1)*(L - 2)*(L - 3)) - (16*(4*L^2 - 12*L + 6)*(L - x)*(L - x - 1)*(x^2 - x))/(L^2*(L - 1)^2*(L - 2)^2*(L - 3)^2)) + (16*k^2*x^2*(L - x))/(L - 1)^2 - (16*k^2*x*(L - x)^2)/(L - 1)^2 - (16*(k + 2*psum - psum)*(-x + 1)*(L^6 - 3*L^5*x - 7*L^5 + 2*L^4*x^2 + 23*L^4*x + 17*L^4 - 20*L^3*x^2 - 55*L^3*x - 17*L^3 + 4*L^2*x^3 + 50*L^2*x^2 + 47*L^2*x + 6*L^2 - 12*L*x^3 - 36*L*x^2 - 12*L*x + 6*x^3 + 6*x^2))/(L*(11*L - 6*L^2 + L^3 - 6)^2) + (16*(x^2 - x)*(L^2 - 2*L*x - L + x^2 + x)*(2*k + 4*psum - 2*psum - 7*L*k - 10*L*psum + 7*L*psum - 2*L*psumk + 3*L^2*k + 4*L^2*psum - 3*L^2*psum + 2*L^2*psumk))/(L*(L^2 - 3*L + 2)*(L^3 - 6*L^2 + 11*L - 6)) - (16*L*k^2*(-x + 1)*(L^2 - 3*L*x - L + 2*x^2 + x))/((L - 1)*(L - 2)*(L - 3)) + (16*k^2*(4*L^2 - 12*L + 6)*(L - x)*(L - x - 1)*(x^2 - x))/((L - 1)^2*(L - 2)^2*(L - 3)^2))/(4*((k^2*(((((-x + 1)*(4*L - 4*x - 4))/((L - 2)*(L - 3)) + 1)*(k + qsum - k^2))/k + ((-x + 1)*(4*L - 4*x - 4)*(k + psum - L*k - L*psum + 2*k^2))/(k*(L - 1)*(L - 2)*(L - 3)))^2*x^2*(L - x)^2)/(L - 1)^2)^(1/2)) + (((16*k^2*(((((-x + 1)*(4*L - 4*x - 4))/((L - 2)*(L - 3)) + 1)*(k - k^2 + qsum))/k + ((-x + 1)*(4*L - 4*x - 4)*(k + psum - L*k - L*psum + 2*k^2))/(k*(L - 1)*(L - 2)*(L - 3)))^2*x^2*(L - x))/(L - 1)^2 - (16*k^2*(((((-x + 1)*(4*L - 4*x - 4))/((L - 2)*(L - 3)) + 1)*(k - k^2 + qsum))/k + ((-x + 1)*(4*L - 4*x - 4)*(k + psum - L*k - L*psum + 2*k^2))/(k*(L - 1)*(L - 2)*(L - 3)))^2*x*(L - x)^2)/(L - 1)^2 + (64*k*(((((-x + 1)*(4*L - 4*x - 4))/((L - 2)*(L - 3)) + 1)*(k - k^2 + qsum))/k + ((-x + 1)*(4*L - 4*x - 4)*(k + psum - L*k - L*psum + 2*k^2))/(k*(L - 1)*(L - 2)*(L - 3)))*x^2*(L - 2*x)*(L - x)^2*(psum - qsum - L*psum + L*qsum - L*k^2 + 3*k^2))/((L - 1)^2*(L^3 - 6*L^2 + 11*L - 6)))*(L*((4*x*(L - x))/(L*(L - 1)) - (16*(L - x)*(L - x - 1)*(x^2 - x))/(L*(L - 1)*(L - 2)*(L - 3)))*(3*k^2 + k + 2*qsum - qsum) + (16*(k + 2*psum - psum)*(x^2 - x)*(L^2 - 2*L*x - L + x^2 + x))/(L^3 - 6*L^2 + 11*L - 6) - (16*k^2*x^2*(L - x)^2)/(L - 1)^2 + (16*L*k^2*(L - x)*(L - x - 1)*(x^2 - x))/((L - 1)*(L - 2)*(L - 3))))/(128*((k^2*(((((-x + 1)*(4*L - 4*x - 4))/((L - 2)*(L - 3)) + 1)*(k + qsum - k^2))/k + ((-x + 1)*(4*L - 4*x - 4)*(k + psum - L*k - L*psum + 2*k^2))/(k*(L - 1)*(L - 2)*(L - 3)))^2*x^2*(L - x)^2)/(L - 1)^2)^(3/2))
 }
 
+C1_w_asy = function(x){
+  1/(2*x*(1-x))
+}
+C2_w_asy = function(x,k,psum,psumk1){
+  (x^2-x+1)/(x*(1-x)) - (2*k*psumk1)/(k+psum)
+}
+
+C1_d_asy = function(x){
+  1/(x*(1-x))
+}
+C2_d_asy = function(x,k,qsum,qsumk1){
+   (10*qsum-4*k*qsumk1-(6*k^2-10*k))/(2*(qsum-k^2+k)) - 1/(2*x*(1-x))
+ }
+
 C1_w = function(x,L,k,psum,qsum){
   if(k==1){
     result=-(x^2*(x - 1)^2*(2*x^2 - 2*L*x + L)*(L^2 - 2*L*x - L + x^2 + x)^2*(3*k + 2*psum + qsum - 4*L*k - 3*L*psum - L*qsum - L*k^2 + L^2*k + L^2*psum + 3*k^2)^2*(2*psum - 4*L + qsum - 3*L*psum - L*qsum - L*k^2 + L^2*psum + L^2 + 3*k^2 + 3))/(2*(L - 1)^5*(L - 2)^6*(L - 3)^3*((x^2*(x - 1)^2*(L^2 - 2*L*x - L + x^2 + x)^2*(3*k + 2*psum + qsum - 4*L*k - 3*L*psum - L*qsum - L*k^2 + L^2*k + L^2*psum + 3*k^2)^2)/((L - 3)^2*(L^2 - 3*L + 2)^4))^(3/2))
@@ -267,17 +282,35 @@ T3.lambda = function(b, n0, n1, L, k, psum, qsum, psumk, qsumk){
   dnorm(b)*b^3*sum(C3*C4*Nu(sqrt(2*C3*b^2))*Nu(sqrt(2*C4*b^2)))
 }
 
-T3.lambdaZw = function(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2){
-  C1  = C1_w(n0:n1,L,k,psum,qsum)
-  C2 = C2_w(n0:n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1, psumk2,qsumk2)
+T3.lambdaZw = function(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp){
+  if(asymp==TRUE){
+     C1 = C1_w_asy((n0:n1)/L)
+     C2 = C2_w_asy((n0:n1)/L,k,psum,psumk1)
+     C2[C2<0] = 0.00000001
+  }
+  if(asymp==FALSE){
+     C1  = C1_w(n0:n1,L,k,psum,qsum)
+     C2 = C2_w(n0:n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1, psumk2,qsumk2)
+
+     C2[C2<0] = 0.00000001
+  }
+
   dnorm(b)*b^3*sum(C1*C2*Nu(sqrt(2*C1*b^2))*Nu(sqrt(2*C2*b^2)))
 }
 
-T3.lambdaZdiff = function(b,n0,n1,L,k,psum,qsum,qsumk,psumk1,qsumk1,psumk2,qsumk2){
-  C1 =C1_d(n0:n1,L,k,qsum)
-  C2 =C2_d(n0:n1,L,k,psum,qsum,qsumk,psumk1,qsumk1,psumk2,qsumk2)
+T3.lambdaZdiff = function(b,n0,n1,L,k,psum,qsum,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp){
+  if(asymp==TRUE){
+    C1 = C1_d_asy((n0:n1)/L)
+    C2 = C2_d_asy((n0:n1)/L,k,qsum,qsumk1)
+    C2[C2<0] = 0.00000001
+  }
+  if(asymp==FALSE){
+    C1 =C1_d(n0:n1,L,k,qsum)
+    C2 =C2_d(n0:n1,L,k,psum,qsum,qsumk,psumk1,qsumk1,psumk2,qsumk2)
 
-  C2[C2<0] = 0.00000001
+    C2[C2<0] = 0.00000001
+
+  }
 
   nu1 = Nu(sqrt(2*C1*b^2))
   nu2 = Nu(sqrt(2*C2*b^2))
@@ -287,23 +320,36 @@ T3.lambdaZdiff = function(b,n0,n1,L,k,psum,qsum,qsumk,psumk1,qsumk1,psumk2,qsumk
   dnorm(b)*b^3*sum(C1*C2*Nu(sqrt(2*C1*b^2))*Nu(sqrt(2*C2*b^2)))
 }
 
-T3.lambdaM = function(D,b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2){
-  pval_Zd = T3.lambdaZdiff(b,n0,n1,L,k,psum,qsum,qsumk,psumk1,qsumk1,psumk2, qsumk2)
-  pval_Zw = T3.lambdaZw(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)
+T3.lambdaM = function(D,b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp){
+  pval_Zd = T3.lambdaZdiff(b,n0,n1,L,k,psum,qsum,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp)
+  pval_Zw = T3.lambdaZw(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)
 
   return(1-(1-D*2*pval_Zd)*(1-D*pval_Zw))
 }
 
-T3.lambdaS = function(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2){
+T3.lambdaS = function(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp){
   integrand = function(t,w){
-    C1w  = C1_w(t,L,k,psum,qsum)
-    C2w = C2_w(t,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)
-    C1d  =C1_d(t,L,k,qsum)
-    C2d = C2_d(t,L,k,psum,qsum,qsumk,psumk1,qsumk1, psumk2 ,qsumk2)
-    C1d[C1d<0]=0
-    C2d[C2d<0]=0
-    C1w[C1w<0]=0
-    C2w[C2w<0]=0
+    if(asymp==TRUE){
+      C1w  = C1_w_asy(t/L)
+      C2w = C2_w_asy(t/L,k,psum,psumk1)
+      C1d  =C1_d_asy(t/L)
+      C2d = C2_d_asy(t/L,k,qsum,qsumk1)
+      C1d[C1d<0]=0
+      C2d[C2d<0]=0
+      C1w[C1w<0]=0
+      C2w[C2w<0]=0
+     }
+   if(asymp==FALSE){
+      C1w  = C1_w(t,L,k,psum,qsum)
+      C2w = C2_w(t,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)
+      C1d  =C1_d(t,L,k,qsum)
+      C2d = C2_d(t,L,k,psum,qsum,qsumk,psumk1,qsumk1, psumk2 ,qsumk2)
+      C1d[C1d<0]=0
+      C2d[C2d<0]=0
+      C1w[C1w<0]=0
+      C2w[C2w<0]=0
+    }
+
     nu1 = Nu(sqrt(2*b*(C1d*cos(w)^2+C1w*sin(w)^2)))
     nu2 = Nu(sqrt(2*b*(C2d*cos(w)^2+C2w*sin(w)^2)))
     (4*(C1d*cos(w)^2+C1w*sin(w)^2)*(C2d*cos(w)^2+C2w*sin(w)^2)*b^2*nu1*nu2)/(2*pi)
@@ -485,6 +531,7 @@ T3.skewed.lambdaZw = function(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1, p
   n = L
   ts = 1:(n-1)
 
+  C2[C2<0] = 0.00000001
   EX = ERw(L,ts,k)
   EX3 = EX3_new.f(ts, L, k, psum, deg.sumsq, deg.sum3, daa, dda, aaa1, aaa2)$ERw3
   VX = varRw(L,ts,k,psum,deg.sumsq)
@@ -620,22 +667,22 @@ getbZ = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,
   }
 }
 
-getbZw = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda, bmin=3,bmax=5,skew.corr=FALSE,dif=1e-10, nIterMax=100){
+getbZw = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda, bmin=3,bmax=5,skew.corr=FALSE,dif=1e-10, nIterMax=100,asymp){
   m0=ARL*alpha
   if(skew.corr==FALSE){
-    
-    pm = T3.lambdaZw(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+
+    pm = T3.lambdaZw(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
     while (pm<alpha){
       bmin = bmin-1
-      pm = T3.lambdaZw(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+      pm = T3.lambdaZw(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
     }
-    pM = T3.lambdaZw(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+    pM = T3.lambdaZw(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
     while (pM>alpha){
       bmax = bmax+1
-      pM = T3.lambdaZw(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+      pM = T3.lambdaZw(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
     }
     b = (bmin+bmax)/2
-    p = T3.lambdaZw(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+    p = T3.lambdaZw(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
     nIter = 1
     while (abs(p-alpha)>dif && nIter<nIterMax){
       if (p<alpha){
@@ -644,7 +691,7 @@ getbZw = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2
         bmin = b
       }
       b = (bmin+bmax)/2
-      p = T3.lambdaZw(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+      p = T3.lambdaZw(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
       nIter = nIter + 1
     }
     return(b)
@@ -677,20 +724,20 @@ getbZw = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2
 
 }
 
-getbS = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=FALSE,dif=1e-10, nIterMax=100){
+getbS = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=FALSE,dif=1e-10, nIterMax=100,asymp){
   m0=ARL*alpha
-  pm = T3.lambdaS(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+  pm = T3.lambdaS(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
   while (pm<alpha){
     bmin = bmin-1
-    pm = T3.lambdaS(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+    pm = T3.lambdaS(bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
   }
-  pM = T3.lambdaS(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+  pM = T3.lambdaS(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
   while (pM>alpha){
     bmax = bmax+1
-    pM = T3.lambdaS(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+    pM = T3.lambdaS(bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
   }
   b = (bmin+bmax)/2
-  p = T3.lambdaS(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+  p = T3.lambdaS(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
   nIter = 1
   while (abs(p-alpha)>dif && nIter<nIterMax){
     if (p<alpha){
@@ -699,27 +746,27 @@ getbS = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,
       bmin = b
     }
     b = (bmin+bmax)/2
-    p = T3.lambdaS(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2)*m0
+    p = T3.lambdaS(b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,asymp)*m0
     nIter = nIter + 1
   }
   b
 }
 
-getbM = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=8,bmax=20,skew.corr=FALSE,dif=1e-10, nIterMax=100){
+getbM = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=21,skew.corr=FALSE,dif=1e-10, nIterMax=100,asymp){
   m0=ARL*alpha
   if(skew.corr==FALSE){
-    pm = T3.lambdaM(m0,bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2)
+    pm = T3.lambdaM(m0,bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp)
     while (pm<alpha){
       bmin = bmin-1
-      pm = T3.lambdaM(m0,bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2)
+      pm = T3.lambdaM(m0,bmin,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp)
     }
-    pM = T3.lambdaM(m0,bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2)
+    pM = T3.lambdaM(m0,bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp)
     while (pM>alpha){
       bmax = bmax+1
-      pM = T3.lambdaM(m0,bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2)
+      pM = T3.lambdaM(m0,bmax,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp)
     }
     b = (bmin+bmax)/2
-    p = T3.lambdaM(m0,b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2)
+    p = T3.lambdaM(m0,b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp)
     nIter = 1
     while (abs(p-alpha)>dif && nIter<nIterMax){
       if (p<alpha){
@@ -728,7 +775,7 @@ getbM = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,
         bmin = b
       }
       b = (bmin+bmax)/2
-      p = T3.lambdaM(m0,b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2)
+      p = T3.lambdaM(m0,b,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2, qsumk2,asymp)
       nIter = nIter + 1
     }
     return(b)
@@ -761,7 +808,7 @@ getbM = function(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,
 }
 #need user to specify ARL and probability of early stop error (for example, ARL = 10,000 and alpha = 0.01 implies D = 100)
 
-getb = function(distM,ARL,alpha,N0,n0,n1,L,k,statistics,skew.corr=FALSE,dif=1e-10, nIterMax=100){
+getb = function(distM,ARL,alpha,N0,n0,n1,L,k,statistics,skew.corr,dif=1e-10, nIterMax=100,asymp){
 
     quantities = gb_quantities(distM,N0,k)
     psum = quantities$psum
@@ -782,16 +829,17 @@ getb = function(distM,ARL,alpha,N0,n0,n1,L,k,statistics,skew.corr=FALSE,dif=1e-1
   output=list()
   if (skew.corr==FALSE){
     if (length(which(!is.na(match(c("o","ori","original","all"), statistics))))>0){
-      output$ori = getbZ(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=FALSE)
+      output$ori = getbZ(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=FALSE,dif=1e-10, nIterMax=100)
     }
     if (length(which(!is.na(match(c("w","weighted","all"), statistics))))>0){
-      output$weighted = getbZw(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=FALSE)
+      output$weighted = getbZw(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda, bmin=3,bmax=5,skew.corr=FALSE,dif=1e-10, nIterMax=100,asymp)
+
     }
     if (length(which(!is.na(match(c("m","max","all"), statistics))))>0){
-      output$max.type = getbM(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=8,bmax=20,skew.corr=FALSE)
+      output$max.type = getbM(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=7,bmax=21,skew.corr=FALSE,dif=1e-10, nIterMax=100,asymp)
     }
     if (length(which(!is.na(match(c("g","generalized","all"), statistics))))>0){
-      output$generalized = getbS(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=20,bmax=30,skew.corr=FALSE)
+      output$generalized = getbS(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=20,bmax=30,skew.corr=FALSE,dif=1e-10, nIterMax=100,asymp)
     }
   return(output)
   }
@@ -801,13 +849,13 @@ getb = function(distM,ARL,alpha,N0,n0,n1,L,k,statistics,skew.corr=FALSE,dif=1e-1
     output$ori = getbZ(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=TRUE)
   }
   if (length(which(!is.na(match(c("w","weighted","all"), statistics))))>0){
-    output$weighted = getbZw(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=TRUE)
+    output$weighted = getbZw(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=3,bmax=5,skew.corr=TRUE,dif=1e-10, nIterMax=100,asymp)
   }
   if (length(which(!is.na(match(c("m","max","all"), statistics))))>0){
-    output$max.type = getbM(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=8,bmax=20,skew.corr=TRUE)
+    output$max.type = getbM(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=8,bmax=20,skew.corr=TRUE,dif=1e-10, nIterMax=100,asymp)
   }
   if (length(which(!is.na(match(c("g","generalized","all"), statistics))))>0){
-    output$generalized = getbS(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=20,bmax=20,skew.corr=TRUE)
+    output$generalized = getbS(ARL,alpha,n0,n1,L,k,psum,qsum,psumk,qsumk,psumk1,qsumk1,psumk2,qsumk2,deg.sumsq,deg.sum3, aaa1,aaa2,daa,dda,bmin=20,bmax=30,skew.corr=TRUE,dif=1e-10, nIterMax=100,asymp)
   }
   return(output)
 

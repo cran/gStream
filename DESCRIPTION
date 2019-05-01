@@ -1,13 +1,13 @@
 Package: gStream
-Version: 0.1.0
-Date: 2018-10-05
+Version: 0.2.0
+Date: 2019-04-28
 Title: Graph-Based Sequential Change-Point Detection for Streaming Data
 Author: Hao Chen and Lynna Chu
 Maintainer: Hao Chen <hxchen@ucdavis.edu>
 Depends: R (>= 3.0.1)
-Description: Uses an approach based on k-nearest neighbor information to sequentially detect change-points. Offers analytic approximations for false discovery control given user-specified average run length.  Can be applied to any type of data (high-dimensional, non-Euclidean, etc.) as long as a reasonable similarity measure is available.
+Description: Uses an approach based on k-nearest neighbor information to sequentially detect change-points. Offers analytic approximations for false discovery control given user-specified average run length.  Can be applied to any type of data (high-dimensional, non-Euclidean, etc.) as long as a reasonable similarity measure is available.  See references (1) Chen, H. (2019) Sequential change-point detection based on nearest neighbors. The Annals of Statistics, 47(3):1381-1407. (2) Chu, L. and Chen, H. (2018) Sequential change-point detection for high-dimensional and non-Euclidean data <arXiv:1810.05973>. 
 License: GPL (>= 2)
 NeedsCompilation: no
-Packaged: 2018-10-16 17:55:14 UTC; haochen
+Packaged: 2019-04-30 21:27:32 UTC; haochen
 Repository: CRAN
-Date/Publication: 2018-10-24 21:50:04 UTC
+Date/Publication: 2019-05-01 22:00:03 UTC

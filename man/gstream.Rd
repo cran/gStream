@@ -5,7 +5,7 @@
 }
 \usage{
 gstream(distM, L, N0, k, statistics = c("all", "o", "w", "g", "m"),
-n0 = 0.3*L, n1 = 0.7*L, ARL = 10000, alpha = 0.05, skew.corr = TRUE)
+n0 = 0.3*L, n1 = 0.7*L, ARL = 10000, alpha = 0.05, skew.corr = TRUE, asymp = FALSE)
 }
 \arguments{
   \item{distM}{A distance matrix constructed based on some distance measure.}
@@ -28,7 +28,8 @@ n0 = 0.3*L, n1 = 0.7*L, ARL = 10000, alpha = 0.05, skew.corr = TRUE)
   \item{n1}{The ending index to be considered as a candidate for the change-point. For example, n1 = L-n0.}
   \item{ARL}{The average run length: the expectation of the stopping rule when there is no change-point.}
   \item{alpha}{The probability of an early stop.}
-  \item{skew.corr}{If skew.corr is TRUE, the p-value approximation would incorporate skewness correction.}
+  \item{skew.corr}{Default is TRUE. If skew.corr is TRUE, the average run length approximation would incorporate skewness correction.}
+  \item{asymp}{Default is FALSE. If asymp is TRUE, the average run length approximation will be based on the asymptotic analytical formulas.}
 }
 
 \value{
@@ -54,7 +55,7 @@ n0 = 0.3*L, n1 = 0.7*L, ARL = 10000, alpha = 0.05, skew.corr = TRUE)
 # This example contains two distance matrices (distM1 and distM2).
 # Information on how distM1 and distM2 are generated can be found in gStream.
 
-data(Example)
+# data(Example)
 
 # Example:
  # distM1 is a distance matrix constructed from a dataset with n=40 observation.
@@ -63,17 +64,19 @@ data(Example)
   # first 20 observations (see package gSeg for offline change-point detection).
   # There is change in mean when tau = 20 (This means a change happens 20 observations
   # after we start the tests. We start the test at N0+1 = 21.)
-  N0 = 20
-  L = 20 # the k-nn graph is constructed on only the L most recent observations.
-  k = 1
 
-  r1= gstream(distM1, L, N0, k, statistics="all", n0=0.3*L, n1=L-0.3*L,
-  ARL=200,alpha=0.05, skew.corr=FALSE)
+  # Uncomment the following to run
+  # N0 = 20
+  # L = 20 # the k-nn graph is constructed on only the L most recent observations.
+  # k = 1
+
+  # r1= gstream(distM1, L, N0, k, statistics="all", n0=0.3*L, n1=0.7*L,
+  # ARL=200,alpha=0.05, skew.corr=TRUE, asymp=FALSE)
   # output results based on all four statistics; the scan statistics can be found in r1$scanZ
-  r1$tauhat # reports the locations where a change-point is detected
-  r1$b # reports the analytical approximations of the thresholds used in the stopping rules
-  
+  # r1$tauhat # reports the locations where a change-point is detected
+  # r1$b # reports the analytical approximations of the thresholds used in the stopping rules
+
   # Set ARL = 10,000
   # r1= gstream(distM1, L, N0, k, statistics="all", n0=0.3*L, n1=L-0.3*L,
-  # ARL=10000,alpha=0.05, skew.corr=TRUE) # uncomment to run this function
+  # ARL=10000,alpha=0.05, skew.corr=TRUE, asymp=FALSE) # uncomment to run this function
 }

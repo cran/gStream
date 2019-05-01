@@ -12,9 +12,9 @@ The function \code{\link{gstream}} will report the graph-based test statistics a
   Maintainer: Hao Chen (hxchen@ucdavis.edu) and Lynna Chu (lbchu@ucdavis.edu)
 }
 \references{
-  Chen, H. (2018) Sequential Change-point Detection Based on Nearest Neighbors.
+  Chen, H. (2019) Sequential Change-point Detection Based on Nearest Neighbors. The Annals of Statistics, 47(3):1381-1407.
 
-  Online access: https://arxiv.org/abs/1604.03611
+  Chu, L. and Chen, H. (2018) Sequential Change-point Detection for High-dimensional and non-Euclidean Data. arXiv:1810.05973.
 }
 
 \seealso{
@@ -24,8 +24,6 @@ The function \code{\link{gstream}} will report the graph-based test statistics a
   # This example contains two distance matrices constructed using L2 distance (distM1 and distM2).
   #In this example, the data is treated as if it were being observed sequentally
   # in order to illustrate how the package works.
-
-  data(Example)
 
   # Example:
   # distM1 is a distance matrix constructed from a dataset with n=40 observation.
@@ -50,18 +48,19 @@ The function \code{\link{gstream}} will report the graph-based test statistics a
   # distM1 = as.matrix(dist(y))
   # diag(distM1) = max(distM1)+100
 
-  N0 = 20
-  L = 20 # the k-nn graph is constructed on only the L most recent observations.
-  k = 1
+  # Uncomment the following to run
+  # N0 = 20
+  # L = 20 # the k-nn graph is constructed on only the L most recent observations.
+  # k = 1
 
-  r1= gstream(distM1, L, N0, k, statistics="all", n0=0.3*L, n1=L-0.3*L,
-  ARL=200,alpha=0.05, skew.corr=TRUE)
+  # r1= gstream(distM1, L, N0, k, statistics="all", n0=0.3*L, n1=L-0.3*L,
+  # ARL=200,alpha=0.05, skew.corr=TRUE,asymp=FALSE)
 
   # output results based on all four statistics; the scan statistics can be found in r1$scanZ
-  r1$tauhat # reports the locations where a change-point is detected
-  r1$b # reports the analytical approximations of the thresholds used in the stopping rules
-  
+  # r1$tauhat # reports the locations where a change-point is detected
+  # r1$b # reports the analytical approximations of the thresholds used in the stopping rules
+
   # Set ARL = 10,000
   # r1= gstream(distM1, L, N0, k, statistics="all", n0=0.3*L, n1=L-0.3*L,
-  # ARL=10000,alpha=0.05, skew.corr=TRUE) # uncomment to run this function
+  # ARL=10000,alpha=0.05, skew.corr=TRUE,asymp=FALSE) # uncomment to run this function
 }
